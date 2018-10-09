@@ -54,4 +54,20 @@ public interface AccountService {
      */
     void transfer(String from, String to, Double amount);
 
+    /**
+     * Добавить сумму на указанный счет.
+     *
+     * @param to счет.
+     * @param amount сумма.
+     */
+    void addAmount(String to, Double amount);
+
+    /**
+     * Вычесть сумму с указанного счета.
+     *
+     * @param to счет.
+     * @param amount сумма.
+     */
+    void subtractAmount(String to, Double amount);
+
 }

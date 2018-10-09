@@ -135,11 +135,50 @@ public class AccountServiceImpl implements AccountService {
         if (toAccount == null) {
             throw new NotFoundException();
         }
-        validateAmount(fromAccount, amount);
+        if (fromAccount.equals(toAccount)) {
+            throw new RuntimeException("Transfer not allowed");
+        }
+        validateAmount(ValidateAmountType.SUBTRACT_AMOUNT, fromAccount, amount);
         fromAccount.setBalance(fromAccount.getBalance() - amount);
         toAccount.setBalance(toAccount.getBalance() + amount);
         accountRepository.save(fromAccount);
         accountRepository.save(toAccount);
+    }
+
+    /**
+     * Добавить сумму на указанный счет.
+     *
+     * @param to счет.
+     * @param amount сумма.
+     */
+    @Override
+    public void addAmount(String to, Double amount) {
+        User currentUser = currentUser();
+        Account account = accountRepository.findByNumber(to);
+        if (account == null || !account.getCustomer().equals(currentUser.getCustomer())) {
+            throw new NotFoundException();
+        }
+        validateAmount(ValidateAmountType.ADD_AMOUNT, account, amount);
+        account.setBalance(account.getBalance() + amount);
+        accountRepository.save(account);
+    }
+
+    /**
+     * Вычесть сумму с указанного счета.
+     *
+     * @param to счет.
+     * @param amount сумма.
+     */
+    @Override
+    public void subtractAmount(String to, Double amount) {
+        User currentUser = currentUser();
+        Account account = accountRepository.findByNumber(to);
+        if (account == null || !account.getCustomer().equals(currentUser.getCustomer())) {
+            throw new NotFoundException();
+        }
+        validateAmount(ValidateAmountType.SUBTRACT_AMOUNT, account, amount);
+        account.setBalance(account.getBalance() - amount);
+        accountRepository.save(account);
     }
 
     /**
@@ -164,14 +203,24 @@ public class AccountServiceImpl implements AccountService {
      * @param account аккаунт.
      * @param amount сумма, списываемая со счета.
      */
-    private void validateAmount(Account account, Double amount) {
+    private void validateAmount(ValidateAmountType type, Account account, Double amount) {
         if (amount < 0) {
             throw new RuntimeException("Amount should be positive");
         }
-        Double currentBalance = account.getBalance();
-        if (currentBalance - amount < 0) {
-            throw new RuntimeException("Amount not valid");
+        if (type == ValidateAmountType.SUBTRACT_AMOUNT) {
+            Double currentBalance = account.getBalance();
+            if (currentBalance - amount < 0) {
+                throw new RuntimeException("Amount not valid");
+            }
         }
+    }
+
+    /**
+     * Тип изменения баланса счета - добавление или вычетание суммы.
+     */
+    private enum ValidateAmountType {
+        ADD_AMOUNT,
+        SUBTRACT_AMOUNT
     }
 
 }

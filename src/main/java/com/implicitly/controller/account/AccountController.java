@@ -100,4 +100,26 @@ public class AccountController {
         return noContent().build();
     }
 
+    /**
+     * Добавить сумму на указанный счет.
+     *
+     * @param transferData {@link TransferDataDTO}
+     */
+    @PostMapping(value = "/account/add-amount", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Void> addAmount(@RequestBody TransferDataDTO transferData) {
+        accountService.addAmount(transferData.getTo(), transferData.getAmount());
+        return noContent().build();
+    }
+
+    /**
+     * Вычесть сумму с указанного счета.
+     *
+     * @param transferData {@link TransferDataDTO}
+     */
+    @PostMapping(value = "/account/subtract-amount", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Void> subtractAmount(@RequestBody TransferDataDTO transferData) {
+        accountService.subtractAmount(transferData.getTo(), transferData.getAmount());
+        return noContent().build();
+    }
+
 }
